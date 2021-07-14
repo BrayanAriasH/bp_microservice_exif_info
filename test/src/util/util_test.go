@@ -7,7 +7,7 @@ import (
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
 )
 
-func TestValidateFileType(t *testing.T) {
+func TestValidateFileTypeNoError(t *testing.T) {
 	file, _ := ioutil.ReadFile("../../images/DSC03986-min.jpg")
 	isValid, err := util.ValidateFileType(file)
 	if err != nil {
@@ -15,5 +15,15 @@ func TestValidateFileType(t *testing.T) {
 	}
 	if !isValid {
 		t.Errorf("Expected value: %v, actual value %v", true, isValid)
+	}
+}
+
+func TestValidateFileTypeNil(t *testing.T) {
+	isValid, err := util.ValidateFileType(nil)
+	if isValid {
+		t.Errorf("Expected isValid value: %v, actual value %v", false, isValid)
+	}
+	if err == nil {
+		t.Errorf("Expected err value: %v, actual value %v", nil, err)
 	}
 }
