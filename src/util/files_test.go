@@ -8,7 +8,7 @@ import (
 )
 
 func TestValidateFileTypeNoError(t *testing.T) {
-	file, _ := ioutil.ReadFile("../../images/DSC03986-min.jpg")
+	file, _ := ioutil.ReadFile("../../test/images/DSC04249.JPG")
 	isValid, err := util.ValidateFileType(file)
 	if err != nil {
 		t.Errorf("Error in TestValidateFileType: %v", err)
