@@ -1,28 +1,29 @@
 package model
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"time"
+
+	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
+	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
+	"github.com/rwcarlsen/goexif/exif"
+)
 
 type Photo struct {
-	MakeWith         string  `json:"make_with"`
-	DateTimeOriginal string  `json:"date_time_original"`
-	EpochDate        int64   `json:"epoch_date"`
-	ExposureTime     float64 `json:"exposure_time"`
-	Orientation      uint    `json:"orientation"`
-	Model            string  `json:"model"`
-	ExposureMode     string  `json:"exposure_mode"`
-	FNumber          float64 `json:"f_number"`
-	GPSLongitude     string  `json:"gps_longitude"`
-	GPSLongitudeRef  string  `json:"gps_longitude_ref"`
-	GPSLatitude      string  `json:"gps_latitude"`
-	GPSLatitudeRef   string  `json:"gps_latitude_ref"`
-	GPSAltitude      float64 `json:"gps_altitude"`
-	PixelXDimension  uint    `json:"pixel_x_dimension"`
-	PixelYDimension  uint    `json:"pixel_y_dimension"`
-	DDLongitude      float64 `json:"dd_longitude"`
-	DDLatitude       float64 `json:"dd_latitude"`
+	MakeWith         string    `json:"make_with"`
+	DateTimeOriginal time.Time `json:"date_time_original"`
+	ExposureTime     string    `json:"exposure_time"`
+	Orientation      string    `json:"orientation"`
+	Model            string    `json:"model"`
+	ExposureMode     string    `json:"exposure_mode"`
+	FNumber          float64   `json:"f_number"`
+	Longitude        float64   `json:"longitude"`
+	Latitude         float64   `json:"latitude"`
+	PixelXDimension  uint      `json:"resolution_x"`
+	PixelYDimension  uint      `json:"resolution_y"`
 }
 
-func (Photo) NewPhoto() *Photo {
+func NewPhoto() *Photo {
 	return &Photo{}
 }
 
@@ -31,10 +32,56 @@ func (p *Photo) String() string {
 	return string(result)
 }
 
-func (p *Photo) Validate() (err error) {
-	if p.GPSLongitude != "" && p.GPSLatitude != "" {
-		//Validate coordinates
-		return nil
+func CreatePhotoFromFile(data []byte) (photo *Photo, err error) {
+	if data == nil {
+		return nil, util.NewError(constant.FileMustBeNotNull)
 	}
-	return nil
+	x, err := util.GetExifFromBytes(data)
+	if err != nil {
+		return nil, err
+	}
+	photo = NewPhoto()
+	photo.MakeWith, err = util.GetExifStringDataByTag(x, exif.Make)
+	if err != nil {
+		return nil, err
+	}
+	photo.DateTimeOriginal, err = x.DateTime()
+	if err != nil {
+		return nil, err
+	}
+	photo.ExposureTime, err = util.GetExifStringDataByTag(x, exif.ExposureTime)
+	if err != nil {
+		return nil, err
+	}
+
+	photo.Orientation, err = util.GetStringOrientation(x)
+	if err != nil {
+		return nil, err
+	}
+	photo.Model, err = util.GetExifStringDataByTag(x, exif.Model)
+	if err != nil {
+		return nil, err
+	}
+	photo.ExposureMode, err = util.GetStringExposureMode(x)
+	if err != nil {
+		return nil, err
+	}
+	photo.FNumber, err = util.GetExifFloatDataByTag(x, exif.FNumber)
+	if err != nil {
+		return nil, err
+	}
+	photo.Latitude, photo.Longitude, err = x.LatLong()
+	if err != nil {
+		return nil, err
+	}
+	photo.PixelXDimension, err = util.GetExifUIntDataByTag(x, exif.PixelXDimension)
+	if err != nil {
+		return nil, err
+	}
+
+	photo.PixelYDimension, err = util.GetExifUIntDataByTag(x, exif.PixelYDimension)
+	if err != nil {
+		return nil, err
+	}
+	return photo, nil
 }
