@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/rwcarlsen/goexif/exif"
@@ -14,14 +15,8 @@ var exposureModeMap = map[int]string{
 }
 
 var orientation = map[int]string{
-	1: "horizontal",
-	2: "horizontal",
-	3: "horizontal",
-	4: "horizontal",
-	5: "vertical",
-	6: "vertical",
-	7: "vertical",
-	8: "vertical",
+	0: "horizontal",
+	1: "vertical",
 }
 
 func GetExifStringDataByTag(exif *exif.Exif, fieldName exif.FieldName) (value string, err error) {
@@ -87,9 +82,20 @@ func GetStringExposureMode(x *exif.Exif) (value string, err error) {
 }
 
 func GetStringOrientation(x *exif.Exif) (value string, err error) {
-	i, err := GetExifIntDataByTag(x, exif.Orientation)
+	resolutionX, err := GetExifIntDataByTag(x, exif.PixelXDimension)
 	if err != nil {
 		return "", err
+	}
+	resolutionY, err := GetExifIntDataByTag(x, exif.PixelYDimension)
+	if err != nil {
+		return "", err
+	}
+	i := 0
+	fmt.Println("resolutionX", resolutionX, "resolutionY", resolutionY)
+	if resolutionX >= resolutionY {
+		i = 0
+	} else {
+		i = 1
 	}
 	return orientation[i], nil
 }
