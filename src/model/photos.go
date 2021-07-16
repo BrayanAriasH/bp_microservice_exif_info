@@ -6,10 +6,12 @@ import (
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
+	"github.com/google/uuid"
 	"github.com/rwcarlsen/goexif/exif"
 )
 
 type Photo struct {
+	Id               string    `json:"id"`
 	MakeWith         string    `json:"make_with"`
 	DateTimeOriginal time.Time `json:"date_time_original"`
 	ExposureTime     string    `json:"exposure_time"`
@@ -83,5 +85,7 @@ func CreatePhotoFromFile(data []byte) (photo *Photo, err error) {
 	if err != nil {
 		return nil, err
 	}
+
+	photo.Id = uuid.New().String()
 	return photo, nil
 }
