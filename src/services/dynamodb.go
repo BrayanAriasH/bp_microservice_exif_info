@@ -25,7 +25,7 @@ func createItem(photo *model.Photo) (item map[string]*dynamodb.AttributeValue) {
 			S: aws.String(photo.DateTimeOriginal.String()),
 		},
 		"creation_date": {
-			S: aws.String(time.Now().String()),
+			S: aws.String(time.Now().Format(time.RFC3339)),
 		},
 		"date_time_unix": {
 			N: aws.String(fmt.Sprintf("%v", time.Now().Unix())),
@@ -40,7 +40,7 @@ func createItem(photo *model.Photo) (item map[string]*dynamodb.AttributeValue) {
 			S: aws.String(photo.Model),
 		},
 		"exposure_mode": {
-			S: aws.String(photo.Model),
+			S: aws.String(photo.ExposureMode),
 		},
 		"f_number": {
 			N: aws.String(fmt.Sprintf("%v", photo.FNumber)),
