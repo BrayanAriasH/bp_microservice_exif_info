@@ -48,6 +48,10 @@ func CreatePhoto(request events.APIGatewayProxyRequest) (response events.APIGate
 	if err != nil {
 		return createResponseError(err), err
 	}
+	err = services.WritePhoto(photo)
+	if err != nil {
+		return createResponseError(err), err
+	}
 	return events.APIGatewayProxyResponse{
 		StatusCode: http.StatusOK,
 		Body:       photo.String(),
