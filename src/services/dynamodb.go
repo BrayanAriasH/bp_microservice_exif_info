@@ -57,6 +57,9 @@ func createItem(photo *model.Photo) (item map[string]*dynamodb.AttributeValue) {
 		"y_resolution": {
 			N: aws.String(fmt.Sprintf("%v", photo.PixelYDimension)),
 		},
+		"iso": {
+			N: aws.String(fmt.Sprintf("%v", photo.ISO)),
+		},
 	}
 	return item
 }

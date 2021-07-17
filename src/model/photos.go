@@ -23,6 +23,7 @@ type Photo struct {
 	Latitude         float64   `json:"latitude"`
 	PixelXDimension  uint      `json:"resolution_x"`
 	PixelYDimension  uint      `json:"resolution_y"`
+	ISO              uint      `json:"iso"`
 }
 
 func NewPhoto() *Photo {
@@ -55,7 +56,6 @@ func CreatePhotoFromFile(data []byte) (photo *Photo, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	photo.Orientation, err = util.GetStringOrientation(x)
 	if err != nil {
 		return nil, err
@@ -80,12 +80,14 @@ func CreatePhotoFromFile(data []byte) (photo *Photo, err error) {
 	if err != nil {
 		return nil, err
 	}
-
 	photo.PixelYDimension, err = util.GetExifUIntDataByTag(x, exif.PixelYDimension)
 	if err != nil {
 		return nil, err
 	}
-
+	photo.ISO, err = util.GetExifUIntDataByTag(x, exif.ISOSpeedRatings)
+	if err != nil {
+		return nil, err
+	}
 	photo.Id = uuid.New().String()
 	return photo, nil
 }
