@@ -6,6 +6,8 @@ import (
 	"net/http"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/model"
+	"github.com/BrayanAriasH/bp_microservice_exif_info/src/services"
+	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
 	"github.com/aws/aws-lambda-go/events"
 )
 
@@ -35,6 +37,14 @@ func CreatePhoto(request events.APIGatewayProxyRequest) (response events.APIGate
 		return createResponseError(err), err
 	}
 	photo, err := model.CreatePhotoFromFile(fileBytes)
+	if err != nil {
+		return createResponseError(err), err
+	}
+	compressedFile, err := util.CreateCompressedImage(fileBytes)
+	if err != nil {
+		return createResponseError(err), err
+	}
+	err = services.UploadImage(fileBytes, compressedFile, photo.Id)
 	if err != nil {
 		return createResponseError(err), err
 	}

@@ -24,3 +24,7 @@ func CompressImage(originalImage []byte, width int, heigth int) (compressedImage
 	}
 	return buf.Bytes(), nil
 }
+
+func CreateCompressedImage(originalImage []byte) (compressedImage []byte, err error) {
+	return CompressImage(originalImage, 800, 0)
+}
