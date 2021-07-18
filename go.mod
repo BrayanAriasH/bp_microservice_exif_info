@@ -3,7 +3,6 @@ module github.com/BrayanAriasH/bp_microservice_exif_info
 go 1.16
 
 require (
-	github.com/aws/aws-lambda-go v1.25.0
 	github.com/aws/aws-sdk-go v1.40.2
 	github.com/disintegration/imaging v1.6.2
 	github.com/google/uuid v1.3.0

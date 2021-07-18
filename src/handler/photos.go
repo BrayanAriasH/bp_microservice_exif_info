@@ -3,57 +3,50 @@ package handler
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/model"
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/services"
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
-	"github.com/aws/aws-lambda-go/events"
 )
 
-func createResponseError(err error) events.APIGatewayProxyResponse {
-	errorResponse := model.NewErrorResponse(http.StatusBadGateway, err)
-	jsonString, err := json.Marshal(errorResponse)
-	if err != nil {
-		return events.APIGatewayProxyResponse{
-			StatusCode: http.StatusInternalServerError,
-			Body:       err.Error(),
-		}
-	}
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusBadRequest,
-		Body:       string(jsonString),
-	}
+func createResponseError(err error, writer http.ResponseWriter) {
+	log.Fatalf("Error: %v", err)
+	writer.WriteHeader(http.StatusInternalServerError)
+	writer.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
 }
 
-func CreatePhoto(request events.APIGatewayProxyRequest) (response events.APIGatewayProxyResponse, err error) {
+func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
+	log.Println("Handling request...")
 	requestPhoto := model.NewRequestPhoto()
-	err = json.Unmarshal([]byte(request.Body), requestPhoto)
+	err := json.NewDecoder(request.Body).Decode(requestPhoto)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
+	log.Println("file-name:", requestPhoto.FileName)
 	fileBytes, err := base64.StdEncoding.DecodeString(requestPhoto.Base64Content)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
 	photo, err := model.CreatePhotoFromFile(fileBytes)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
 	compressedFile, err := util.CreateCompressedImage(fileBytes)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
 	err = services.UploadImage(fileBytes, compressedFile, photo.Id)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
 	err = services.WritePhoto(photo)
 	if err != nil {
-		return createResponseError(err), err
+		createResponseError(err, writer)
 	}
-	return events.APIGatewayProxyResponse{
-		StatusCode: http.StatusOK,
-		Body:       photo.String(),
-	}, nil
+	writer.WriteHeader(http.StatusOK)
+	writer.Header().Set("Content-Type", "application/json")
+	writer.Write([]byte(photo.String()))
 }
