@@ -74,7 +74,8 @@ func CreatePhotoFromFile(data []byte) (photo *Photo, err error) {
 	}
 	photo.Latitude, photo.Longitude, err = x.LatLong()
 	if err != nil {
-		return nil, err
+		photo.Latitude = 0
+		photo.Longitude = 0
 	}
 	photo.PixelXDimension, err = util.GetExifUIntDataByTag(x, exif.PixelXDimension)
 	if err != nil {
