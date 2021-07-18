@@ -12,7 +12,8 @@ func main() {
 
 	http.HandleFunc("/create-image", handler.CreatePhoto)
 	http.HandleFunc("/ping", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "pong")
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintf(w, `{"response": "pong ;)"}`)
 	})
 	log.Println(">>>>Starting server in port 1503")
 	log.Fatal(http.ListenAndServe(":1503", nil))
