@@ -12,8 +12,8 @@ import (
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/util"
 )
 
-func createResponseError(err error, writer http.ResponseWriter) {
-	log.Fatalf("Error: %v", err)
+func createResponseError(err error, tag string, writer http.ResponseWriter) {
+	log.Fatalf("Error in %s, %s", err)
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
 }
@@ -27,10 +27,7 @@ func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
 	file, handler, err := request.FormFile("the-file")
 	if err != nil {
 		log.Fatalf("Error retrieving the file: %v", err)
-		return
-	}
-	if err != nil {
-		createResponseError(err, writer)
+		createResponseError(err, "retrieving the file", writer)
 	}
 	defer file.Close()
 	log.Printf("Uploaded File: %+v\n", handler.Filename)
@@ -38,27 +35,23 @@ func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
 	log.Printf("MIME Header: %+v\n", handler.Header)
 	fileBytes := bytes.NewBuffer(nil)
 	if _, err := io.Copy(fileBytes, file); err != nil {
-		createResponseError(err, writer)
-	}
-	if fileBytes == nil {
-		log.Fatal("The filebytes is nil.")
-		createResponseError(err, writer)
+		createResponseError(err, "copying files", writer)
 	}
 	photo, err := model.CreatePhotoFromFile(fileBytes.Bytes())
 	if err != nil {
-		createResponseError(err, writer)
+		createResponseError(err, "CreatePhotoFromFile", writer)
 	}
 	compressedFile, err := util.CreateCompressedImage(fileBytes.Bytes())
 	if err != nil {
-		createResponseError(err, writer)
+		createResponseError(err, "CreateCompressedImage", writer)
 	}
 	err = services.UploadImage(fileBytes.Bytes(), compressedFile, photo.Id)
 	if err != nil {
-		createResponseError(err, writer)
+		createResponseError(err, "UploadImage", writer)
 	}
 	err = services.WritePhoto(photo)
 	if err != nil {
-		createResponseError(err, writer)
+		createResponseError(err, "WritePhoto", writer)
 	}
 	writer.WriteHeader(http.StatusOK)
 	writer.Header().Set("Content-Type", "application/json")
