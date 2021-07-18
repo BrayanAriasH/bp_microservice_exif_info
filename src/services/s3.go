@@ -9,11 +9,14 @@ import (
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-var sess = session.Must(session.NewSession(getS3SessionConfig()))
+var sess = createSession()
 var uploader = s3manager.NewUploader(sess)
 
 func getS3SessionConfig() *aws.Config {
@@ -23,6 +26,18 @@ func getS3SessionConfig() *aws.Config {
 		Timeout: 120 * time.Second,
 	})
 	return s3Config
+}
+
+func createSession() *session.Session {
+	sess := session.Must(session.NewSession(getS3SessionConfig()))
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&ec2rolecreds.EC2RoleProvider{
+			Client:       ec2metadata.New(sess, getS3SessionConfig()),
+			ExpiryWindow: 0,
+		},
+	})
+
+	sess.Config.Credentials = creds
 }
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
