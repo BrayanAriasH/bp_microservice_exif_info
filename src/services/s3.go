@@ -4,16 +4,41 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-var sess = session.Must(session.NewSession(&aws.Config{
-	Region: aws.String("us-east-2")}))
+var sess = createSession()
 var uploader = s3manager.NewUploader(sess)
+
+func getS3SessionConfig() *aws.Config {
+	s3Config := aws.NewConfig()
+	s3Config.Region = aws.String("us-east-2")
+	s3Config.WithHTTPClient(&http.Client{
+		Timeout: 120 * time.Second,
+	})
+	return s3Config
+}
+
+func createSession() *session.Session {
+	sess := session.Must(session.NewSession(getS3SessionConfig()))
+	creds := credentials.NewChainCredentials([]credentials.Provider{
+		&ec2rolecreds.EC2RoleProvider{
+			Client:       ec2metadata.New(sess, getS3SessionConfig()),
+			ExpiryWindow: 0,
+		},
+	})
+
+	sess.Config.Credentials = creds
+}
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
 	if bucket == "" {
