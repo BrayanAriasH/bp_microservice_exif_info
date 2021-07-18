@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"net/http"
+	"time"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,9 +13,17 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-var sess = session.Must(session.NewSession(&aws.Config{
-	Region: aws.String("us-east-2")}))
+var sess = session.Must(session.NewSession(getS3SessionConfig()))
 var uploader = s3manager.NewUploader(sess)
+
+func getS3SessionConfig() *aws.Config {
+	s3Config := aws.NewConfig()
+	s3Config.Region = aws.String("us-east-2")
+	s3Config.WithHTTPClient(&http.Client{
+		Timeout: 120 * time.Second,
+	})
+	return s3Config
+}
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
 	if bucket == "" {
