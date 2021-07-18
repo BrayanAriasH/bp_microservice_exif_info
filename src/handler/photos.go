@@ -13,7 +13,7 @@ import (
 )
 
 func createResponseError(err error, tag string, writer http.ResponseWriter) {
-	log.Fatalf("Error in %s, %s", err)
+	log.Fatalf("Error in %s, %s", tag, err)
 	writer.WriteHeader(http.StatusBadRequest)
 	writer.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
 }

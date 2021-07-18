@@ -6,11 +6,13 @@ import (
 	"log"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/constant"
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
-var sess = session.Must(session.NewSession())
+var sess = session.Must(session.NewSession(&aws.Config{
+	Region: aws.String("us-east-2")}))
 var uploader = s3manager.NewUploader(sess)
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
