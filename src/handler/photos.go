@@ -53,7 +53,7 @@ func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
 	if err != nil {
 		createResponseError(err, "WritePhoto", writer)
 	}
-	writer.WriteHeader(http.StatusOK)
+	writer.WriteHeader(http.StatusCreated)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Write([]byte(photo.String()))
 }
