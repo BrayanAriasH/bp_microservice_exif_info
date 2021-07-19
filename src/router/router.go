@@ -2,6 +2,7 @@ package router
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/BrayanAriasH/bp_microservice_exif_info/src/handler"
@@ -20,7 +21,7 @@ func writeInfoMicroservice(writer http.ResponseWriter) {
 func Route(writer http.ResponseWriter, request *http.Request) {
 	path := request.URL.Path
 	method := request.Method
-
+	log.Printf("Routing path %s", path)
 	if method == "GET" {
 		switch path {
 		case "/":
