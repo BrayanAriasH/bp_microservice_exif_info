@@ -41,6 +41,7 @@ func createSession() *session.Session {
 }
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
+	log.Printf("Uploading file %s into %s", key, bucket)
 	if bucket == "" {
 		bucket = constant.DefaultPhotosBucketName
 	}
