@@ -36,8 +36,8 @@ func createSession() *session.Session {
 			ExpiryWindow: 0,
 		},
 	})
-
 	sess.Config.Credentials = creds
+	return sess
 }
 
 func UploadFile(file []byte, key string, bucket string) (err error) {
