@@ -23,7 +23,7 @@ func getS3SessionConfig() *aws.Config {
 	s3Config := aws.NewConfig()
 	s3Config.Region = aws.String("us-east-2")
 	s3Config.WithHTTPClient(&http.Client{
-		Timeout: 120 * time.Second,
+		Timeout: 10 * time.Second,
 	})
 	return s3Config
 }
