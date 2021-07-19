@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -13,9 +12,8 @@ import (
 )
 
 func createResponseError(err error, tag string, writer http.ResponseWriter) {
-	log.Fatalf("Error in %s, %s", tag, err)
-	writer.WriteHeader(http.StatusBadRequest)
-	writer.Write([]byte(fmt.Sprintf("500 - %s", err.Error())))
+	log.Printf("Error on CreatePhoto in section %s: %v", tag, err)
+	writer.WriteHeader(http.StatusInternalServerError)
 }
 
 func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
@@ -26,7 +24,7 @@ func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
 	// the Header and the size of the file
 	file, handler, err := request.FormFile("the-file")
 	if err != nil {
-		log.Fatalf("Error retrieving the file: %v", err)
+		log.Printf("Error retrieving the file: %v", err)
 		createResponseError(err, "retrieving the file", writer)
 	}
 	defer file.Close()
@@ -36,24 +34,30 @@ func CreatePhoto(writer http.ResponseWriter, request *http.Request) {
 	fileBytes := bytes.NewBuffer(nil)
 	if _, err := io.Copy(fileBytes, file); err != nil {
 		createResponseError(err, "copying files", writer)
+		return
 	}
 	photo, err := model.CreatePhotoFromFile(fileBytes.Bytes())
 	if err != nil {
 		createResponseError(err, "CreatePhotoFromFile", writer)
+		return
 	}
 	compressedFile, err := util.CreateCompressedImage(fileBytes.Bytes())
 	if err != nil {
 		createResponseError(err, "CreateCompressedImage", writer)
+		return
 	}
 	err = services.UploadImage(fileBytes.Bytes(), compressedFile, photo.Id)
 	if err != nil {
 		createResponseError(err, "UploadImage", writer)
+		return
 	}
 	err = services.WritePhoto(photo)
 	if err != nil {
 		createResponseError(err, "WritePhoto", writer)
+		return
 	}
 	writer.WriteHeader(http.StatusCreated)
 	writer.Header().Set("Content-Type", "application/json")
 	writer.Write([]byte(photo.String()))
+	log.Println("Image created with id", photo.Id)
 }

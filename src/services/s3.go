@@ -52,7 +52,7 @@ func UploadFile(file []byte, key string, bucket string) (err error) {
 	}
 	result, err := uploader.Upload(fileToUpload)
 	if err != nil {
-		log.Fatalf("Error on UploadFile %v", err)
+		log.Printf("Error on UploadFile %v", err)
 		return err
 	}
 	log.Printf("Archivo %s cargado correctamente", key)

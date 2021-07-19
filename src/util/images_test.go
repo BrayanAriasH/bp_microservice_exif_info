@@ -13,7 +13,7 @@ func TestCompressImage(t *testing.T) {
 	for _, path := range paths {
 		file, err := ioutil.ReadFile(path)
 		if err != nil {
-			log.Fatalf("Error on TestCompressImage: %s", err)
+			log.Printf("Error on TestCompressImage: %s", err)
 			return
 		}
 		img, err := CompressImage(file, 800, 0)
