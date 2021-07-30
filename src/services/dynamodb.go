@@ -22,7 +22,7 @@ func createItem(photo *model.Photo) (item map[string]*dynamodb.AttributeValue) {
 			S: aws.String(photo.MakeWith),
 		},
 		"date_time_original": {
-			S: aws.String(photo.DateTimeOriginal.String()),
+			S: aws.String(photo.DateTimeOriginal.Format(time.RFC3339)),
 		},
 		"creation_date": {
 			S: aws.String(time.Now().Format(time.RFC3339)),
