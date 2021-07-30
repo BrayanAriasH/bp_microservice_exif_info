@@ -2,7 +2,7 @@ package util
 
 import (
 	"bytes"
-	"fmt"
+	"log"
 	"strings"
 
 	"github.com/rwcarlsen/goexif/exif"
@@ -50,6 +50,7 @@ func GetExifUIntDataByTag(exif *exif.Exif, fieldName exif.FieldName) (value uint
 	if err != nil {
 		return 0, err
 	}
+	log.Printf("tag: %s, value %v", string(fieldName), result)
 	return uint(result), nil
 }
 
@@ -90,8 +91,12 @@ func GetStringOrientation(x *exif.Exif) (value string, err error) {
 	if err != nil {
 		return "", err
 	}
-	i := 0
-	fmt.Println("resolutionX", resolutionX, "resolutionY", resolutionY)
+	orientationImg, err := GetExifIntDataByTag(x, exif.Orientation)
+	if err != nil {
+		return "", err
+	}
+	log.Println("resolutionX", resolutionX, "resolutionY", resolutionY, "Orientation", orientationImg)
+	var i int
 	if resolutionX >= resolutionY {
 		i = 0
 	} else {
